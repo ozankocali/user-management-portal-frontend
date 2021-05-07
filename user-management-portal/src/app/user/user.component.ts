@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
 import { User } from '../model/user';
@@ -19,6 +20,8 @@ export class UserComponent implements OnInit {
   public refreshing :boolean;
   private subscriptions:Subscription[]=[];
   public selectedUser: User;
+  public fileName: string;
+  public profileImage: File;
   
 
 
@@ -55,7 +58,62 @@ export class UserComponent implements OnInit {
 
   public onSelectUser(selectedUser:User):void{
     this.selectedUser=selectedUser;
-    document.getElementById('openUserInfo').click();
+    this.clickButton('openUserInfo');
+  }
+
+  public onProfileImageChange(fileName:string,profileImage:File):void{
+    this.fileName=fileName;
+    this.profileImage=profileImage
+  }
+
+  public saveNewUser():void{
+    this.clickButton('new-user-save');
+  }
+
+  public onAddNewUser(userForm:NgForm):void{
+    const formData=this.userService.createUserFormData(null,userForm.value,this.profileImage);
+
+    this.subscriptions.push(
+      this.userService.addUser(formData).subscribe(
+        (response:User)=>{
+          this.clickButton('new-user-close');
+          this.getUsers(false);
+          this.fileName=null;
+          this.profileImage=null;
+          userForm.reset();
+          this.sendNotification(NotificationType.SUCCESS,`${response.firstName} ${response.lastName} added successfully.`);
+
+        },
+        (errorResponse:HttpErrorResponse)=>{
+          this.sendNotification(NotificationType.ERROR,errorResponse.message);
+          this.profileImage=null;
+        }
+      )
+
+    );
+  }
+
+  public searchUsers(searchTerm:string):void{
+   const results:User[]=[];
+   for(const user of this.userService.getUsersFromLocalCache()){
+
+    if(user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1||
+       user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1||
+       user.username.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1||
+       user.userId.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1){
+      results.push(user);
+    }
+
+   }
+
+   this.users=results;
+   if(results.length==0||!searchTerm){
+      this.users=this.userService.getUsersFromLocalCache();
+   }
+  }
+
+  private clickButton(buttonId:string):void{
+    document.getElementById(buttonId).click();
   }
 
   private sendNotification(notificationType: NotificationType, message: string):void {
