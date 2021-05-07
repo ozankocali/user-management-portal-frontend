@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { NotificationType } from '../enum/notification-type.enum';
+import { CustomHttpResponse } from '../model/custom-http-response';
 import { User } from '../model/user';
 import { NotificationService } from '../service/notification.service';
 import { UserService } from '../service/user.service';
@@ -139,6 +140,21 @@ export class UserComponent implements OnInit {
         }
       )
 
+    );
+  }
+
+  public onDeleteUser(userId:number):void{
+    this.subscriptions.push(
+      this.userService.deleteUser(userId).subscribe(
+        (response:CustomHttpResponse)=>{
+          this.sendNotification(NotificationType.SUCCESS, response.message);
+          this.getUsers(false);
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.sendNotification(NotificationType.ERROR, errorResponse.message);
+          this.profileImage = null;
+        }
+      )
     );
   }
 

@@ -39,7 +39,7 @@ export class UserService {
   }
 
   public deleteUser(userId:number):Observable<CustomHttpResponse|HttpErrorResponse>{
-    return this.http.delete<CustomHttpResponse>(`${this.host}/delete/${userId}`);
+    return this.http.delete<CustomHttpResponse>(`${this.host}/user/delete/${userId}`);
   }
 
   public addUsersToLocalCache(users:User[]):void{
