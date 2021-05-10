@@ -516,7 +516,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal"
             id="closeEditUserModalButton">Close</button>
-          <button type="button" (click)="onUpdateUser()" [disabled]="editUserForm.invalid || isAdminOrManager" class="btn btn-primary">Save
+          <button type="button" (click)="onUpdateUser()" [disabled]="editUserForm.invalid || !isAdminOrManager" class="btn btn-primary">Save
             changes</button>
         </div>
       </div>
